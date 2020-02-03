@@ -30,7 +30,7 @@
         <div class="row justify-content-center">
             <div class="col-md-12">
                 <div class="card" style="padding: 5px">
-                    <div class="card-header">Evidencija index
+                    <div class="card-header">Pregled svih racuna
                         <a class="btn btn-success" style="float: right;" href="javascript:void(0)"
                            id="create_new_order"> Novi nalog</a></div>
                     <table class="table table-striped data-table">
@@ -39,7 +39,9 @@
                             <th>#</th>
                             <th>Klijent</th>
                             <th>Datum</th>
-                            <th>Cena</th>
+                            <th>Cena [RSD]</th>
+                            <th>Planeco</th>
+                            <th>Broj racuna</th>
                             <th>Akcija</th>
                         </tr>
                         </thead>
@@ -64,23 +66,22 @@
                         <input type="hidden" name="order_id" id="order_id">
 
                         <div class="form-group">
-                            <label for="total" class="col-sm-2 control-label">Cena</label>
-                            <div class="col-sm-2">
-                                {{--mora da se promeni i id i name--}}
-                                <input type="text" class="form-control" id="total" name="total"
-                                       placeholder="Enter Total" value="" maxlength="50" required="">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">Detalji</label>
-                            <div class="col-sm-12">
+                            <label class="col-sm-2 control-label">Klijent</label>
+                            <div class="col-sm-4">
                                 <select id="client_id" name="client_id" class="form-control" required>
-                                    <option value="">izaberite klijenta</option>
+                                    <option value="">Izaberite klijenta</option>
                                     @foreach($clients as $client)
                                         <option value="{{$client['id']}}">{{$client['name']}}</option>
                                     @endforeach
                                 </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="date" class="col-sm-2 control-label">Datum</label>
+                            <div class="col-sm-4">
+                                <input type="date" class="form-control" id="date" name="date"
+                                       placeholder="Enter Total" value="" maxlength="50" required="">
                             </div>
                         </div>
 
@@ -108,8 +109,15 @@
                 columns: [
                     {data: 'DT_RowIndex', name: 'DT_RowIndex'},
                     {data: 'client', name: 'client'},
-                    {data: 'date', name: 'date'},
-                    {data: 'total', name: 'total'},
+                    {data: 'date_formated', name: 'date_formated'},
+                    // {data: 'date', name: 'date'},
+                    {data: 'total',
+                        name: 'total',
+                        className: 'dt-body-right',
+                        render: $.fn.dataTable.render.number(',', '.', 2),
+                    },
+                    {data: 'paid', name: 'paid'},
+                    {data: 'account_num', name: 'account_num'},
                     {data: 'action', name: 'action', orderable: false, searchable: false},
                 ]
             });
@@ -125,36 +133,20 @@
                 $('#ajaxModel').modal('show');
             });
 
-            $('body').on('click', '#show_order1', function () {
-                var order_id = $(this).data('id');
-                $.get("{{ route('orders.index') }}" + '/' + order_id + '/edit', function (data) {
-                $('#modelHeading').html("Show Order");
-                $('#saveBtn').val("edit-order");
-                $('#ajaxModel').modal('show');
-                $('#order_id').val(data.id);
-                $('#total').val(data.total);
-                $('#total').prop("readonly", true);
-                $('#client_id').val(data.client_id);
-                $('#client_id').prop('disabled', 'disabled');
-                $('#saveBtn').hide()
-                })
-            });
-
-            $('body').on('click', '#show_order', function () {
-                var order_id = $(this).data('id');
-                $.get("{{ route('orders.show') }}" + '/' + order_id, function (data) {
-                    $('#modelHeading').html("Show Order");
-                    $('#saveBtn').val("edit-order");
-                    $('#ajaxModel').modal('show');
-                    $('#order_id').val(data.id);
-                    $('#total').val(data.total);
-                    $('#total').prop("readonly", true);
-                    $('#client_id').val(data.client_id);
-                    $('#client_id').prop('disabled', 'disabled');
-                    $('#saveBtn').hide()
-                })
-            });
-
+            {{--$('body').on('click', '#show_order', function () {--}}
+                {{--var order_id = $(this).data('id');--}}
+                {{--$.get("{{ route('orders.show') }}" + '/' + order_id, function (data) {--}}
+                    {{--$('#modelHeading').html("Show Order");--}}
+                    {{--$('#saveBtn').val("edit-order");--}}
+                    {{--$('#ajaxModel').modal('show');--}}
+                    {{--$('#order_id').val(data.id);--}}
+                    {{--$('#total').val(data.total);--}}
+                    {{--$('#total').prop("readonly", true);--}}
+                    {{--$('#client_id').val(data.client_id);--}}
+                    {{--$('#client_id').prop('disabled', 'disabled');--}}
+                    {{--$('#saveBtn').hide()--}}
+                {{--})--}}
+            {{--});--}}
 
 
             $('#saveBtn').click(function (e) {

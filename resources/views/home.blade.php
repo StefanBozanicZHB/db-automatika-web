@@ -36,7 +36,7 @@
                         </div>
                     @endif
 
-                    You are logged in!
+                    Dobro dosao Bozanic!
                 </div>
             </div>
         </div>

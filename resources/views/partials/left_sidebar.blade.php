@@ -14,7 +14,7 @@ left sidebar -->
                     </li>
 
                     <li class="nav-item ">
-                        <a class="nav-link" href="{{ route('orders.index') }}"><i class="fas fa-newspaper"></i>Dashboard <span class="badge badge-success">6</span></a>
+                        <a class="nav-link" href="{{ route('orders.index') }}"><i class="fas fa-newspaper"></i>Evidencija <span class="badge badge-success">6</span></a>
                     </li>
 
                     <li class="nav-item">

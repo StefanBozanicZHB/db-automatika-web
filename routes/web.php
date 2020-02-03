@@ -18,6 +18,8 @@ Route::get('/', function () {
 Route::resource('clients', 'ClientController');
 Route::resource('orders', 'OrderController');
 Route::resource('items', 'ItemController');
+Route::resource('order_items', 'OrderItemController');
+Route::post('orders/paid', 'OrderController@paid')->name('orders.paid');
 
 Auth::routes();
 
