@@ -106,6 +106,7 @@ class ItemController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Item::find($id)->delete();
+        return response()->json(['success' => 'Racun uspesno obrisan.']);
     }
 }

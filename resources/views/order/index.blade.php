@@ -30,9 +30,9 @@
         <div class="row justify-content-center">
             <div class="col-md-12">
                 <div class="card" style="padding: 5px">
-                    <div class="card-header">Pregled svih racuna
+                    <div class="card-header">Pregled svih faktura
                         <a class="btn btn-success" style="float: right;" href="javascript:void(0)"
-                           id="create_new_order"> Novi nalog</a></div>
+                           id="create_new">Nova faktura</a></div>
                     <table class="table table-striped data-table">
                         <thead>
                         <tr>
@@ -40,8 +40,8 @@
                             <th>Klijent</th>
                             <th>Datum</th>
                             <th>Cena [RSD]</th>
-                            <th>Planeco</th>
-                            <th>Broj racuna</th>
+                            <th>Plaćeno</th>
+                            <th>Broj računa</th>
                             <th>Akcija</th>
                         </tr>
                         </thead>
@@ -53,7 +53,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ajaxModel" aria-hidden="true">
+    <div class="modal fade" id="ajaxModalOrder" aria-hidden="true">
         <div class="modal-dialog" style="max-width: 60%">
             <div class="modal-content">
                 <div class="modal-header">
@@ -62,12 +62,11 @@
                 <div class="modal-body">
                     <form id="orderForm" name="orderForm" class="form-horizontal">
                         @csrf
-                        {{--prenese se id--}}
                         <input type="hidden" name="order_id" id="order_id">
 
                         <div class="form-group">
                             <label class="col-sm-2 control-label">Klijent</label>
-                            <div class="col-sm-4">
+                            <div class="col-sm-8">
                                 <select id="client_id" name="client_id" class="form-control" required>
                                     <option value="">Izaberite klijenta</option>
                                     @foreach($clients as $client)
@@ -79,14 +78,14 @@
 
                         <div class="form-group">
                             <label for="date" class="col-sm-2 control-label">Datum</label>
-                            <div class="col-sm-4">
+                            <div class="col-sm-8">
                                 <input type="date" class="form-control" id="date" name="date"
                                        placeholder="Enter Total" value="" maxlength="50" required="">
                             </div>
                         </div>
 
                         <div class="col-sm-offset-2 col-sm-10">
-                            <button type="submit" class="btn btn-primary" id="saveBtn" value="create">Sacuvaj izmene
+                            <button type="submit" class="btn btn-primary" id="save_btn" value="create">Sačuvaj izmene
                             </button>
                         </div>
                     </form>
@@ -116,40 +115,25 @@
                         className: 'dt-body-right',
                         render: $.fn.dataTable.render.number(',', '.', 2),
                     },
-                    {data: 'paid', name: 'paid'},
-                    {data: 'account_num', name: 'account_num'},
+                    {data: 'paid', name: 'paid', className: 'dt-body-center'},
+                    {data: 'account_num', name: 'account_num', className: 'dt-body-center'},
                     {data: 'action', name: 'action', orderable: false, searchable: false},
                 ]
             });
 
-            $('#create_new_order').click(function () {
-                $('#saveBtn').show();
+            $('#create_new').click(function () {
+                $('#save_btn').show();
+                $('#save_btn').val("create-order");
                 $('#total').prop("readonly", false);
                 $('#client_id').prop('disabled', false);
-                $('#saveBtn').val("create-order");
                 $('#order_id').val('');
                 $('#orderForm').trigger("reset");
-                $('#modelHeading').html("Kreiraj novi izvestaj");
-                $('#ajaxModel').modal('show');
+                $('#modelHeading').html("Napravi novu faktutu");
+
+                $('#ajaxModalOrder').modal('show');
             });
 
-            {{--$('body').on('click', '#show_order', function () {--}}
-                {{--var order_id = $(this).data('id');--}}
-                {{--$.get("{{ route('orders.show') }}" + '/' + order_id, function (data) {--}}
-                    {{--$('#modelHeading').html("Show Order");--}}
-                    {{--$('#saveBtn').val("edit-order");--}}
-                    {{--$('#ajaxModel').modal('show');--}}
-                    {{--$('#order_id').val(data.id);--}}
-                    {{--$('#total').val(data.total);--}}
-                    {{--$('#total').prop("readonly", true);--}}
-                    {{--$('#client_id').val(data.client_id);--}}
-                    {{--$('#client_id').prop('disabled', 'disabled');--}}
-                    {{--$('#saveBtn').hide()--}}
-                {{--})--}}
-            {{--});--}}
-
-
-            $('#saveBtn').click(function (e) {
+            $('#save_btn').click(function (e) {
                 e.preventDefault();
                 $(this).html('Slanje...');
 
@@ -161,14 +145,14 @@
                     success: function (data) {
 
                         $('#orderForm').trigger("reset");
-                        $('#ajaxModel').modal('hide');
+                        $('#ajaxModalOrder').modal('hide');
                         table.draw();
-                        $('#saveBtn').html('Save Changes');
+                        $('#save_btn').html('Uspešno sačuvano');
 
                     },
                     error: function (data) {
                         console.log('Error:', data);
-                        $('#saveBtn').html('Save Changes');
+                        $('#save_btn').html('Došlo je do greške, pokušakte ponovo');
                     }
                 });
             });
@@ -176,7 +160,7 @@
             $('body').on('click', '#delete_order', function () {
 
                 var order_id = $(this).data("id");
-                confirm("Are You sure want to delete order!");
+                confirm("Da li ste sigurni da želite da obrišete?");
 
                 $.ajax({
                     type: "DELETE",

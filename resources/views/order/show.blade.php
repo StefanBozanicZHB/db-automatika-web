@@ -6,13 +6,15 @@
     <div class="row">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
             <div class="page-header">
-                <h2 class="pageheader-title">DB Automatika Pregled Racuna</h2>
+                <h2 class="pageheader-title">DB Automatika Pregled Fakture</h2>
                 <div class="page-breadcrumb">
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="{{route('home')}}"
                                                            class="breadcrumb-link">Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Pregled Racuna</li>
+                            <li class="breadcrumb-item"><a href="{{route('orders.index')}}"
+                                                                                      class="breadcrumb-link">Pregled Evidencije</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Pregled Fakture</li>
                         </ol>
                     </nav>
                 </div>
@@ -56,11 +58,11 @@
                         </div>
                         @if($paid =='NEISPLACENO')
                             <div class="title m-b-md" style="color:red; font-weight: bold;">
-                                {{$paid}}
+                                NEISPLAĆENO
                             </div>
                         @else
                             <div class="title m-b-md" style="color:green; font-weight: bold;">
-                                {{$paid}}
+                                PLAĆENO
                             </div>
                         @endif
 
@@ -70,7 +72,7 @@
 
                         <div style="margin: 5px 0px 60px 0px;">
                             <a class="btn btn-success" style="float: right;" href="javascript:void(0)"
-                               id="create_new_order"> Nova stavka</a></div>
+                               id="create_new_item">Nova stavka</a></div>
                     </div>
 
                     <table class="table table-striped data-table">
@@ -79,7 +81,7 @@
                             <th>#</th>
                             <th>Stavka</th>
                             <th>Cena [RSD]</th>
-                            <th>Kolicina</th>
+                            <th>Količina</th>
                             <th>Akcija</th>
                         </tr>
                         </thead>
@@ -91,14 +93,16 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ajaxModel" aria-hidden="true">
+{{--    modal za dodavanje nove stavke--}}
+{{--    najbitnije je name da formu csrf, id je bitan za promeni komponente--}}
+    <div class="modal fade" id="ajax_modal_new_item" aria-hidden="true">
         <div class="modal-dialog" style="max-width: 60%">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="modelHeading"></h4>
+                    <h4 class="modal-title" id="modelHeading">Dodavanje nove stavke</h4>
                 </div>
                 <div class="modal-body">
-                    <form id="orderForm" name="orderForm" class="form-horizontal">
+                    <form id="form_new_item" name="form_new_item" class="form-horizontal">
                         @csrf
                         <input type="hidden" name="order_id" value="{{$order_id}}">
 
@@ -115,23 +119,23 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="unit_price" class="col-sm-6 control-label">Kolicina</label>
+                            <label for="unit_price" class="col-sm-6 control-label">Količina</label>
                             <div class="col-sm-4">
                                 <input type="number" class="form-control" id="quantity" name="quantity"
-                                       placeholder="Kolicina" value="" maxlength="8" required="">
+                                       placeholder="Količina" value="" maxlength="8" required="">
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="unit_price" class="col-sm-6 control-label">Cena po komadu</label>
-                            <div class="col-sm-4">
+                            <label for="unit_price" class="col-sm-6 control-label">Cena po komadu u dinarima</label>
+                            <div class="col-sm-6">
                                 <input type="number" class="form-control" id="unit_price" name="unit_price"
-                                       placeholder="Cena po komadu" value="" maxlength="8" required="">
+                                       placeholder="RSD" value="" maxlength="8" required="">
                             </div>
                         </div>
 
                         <div class="col-sm-offset-2 col-sm-10">
-                            <button type="submit" class="btn btn-primary" id="saveBtn" value="create">Sacuvaj izmene
+                            <button type="submit" class="btn btn-primary" id="save_btn" value="create">Sačuvaj izmene
                             </button>
                         </div>
                     </form>
@@ -140,26 +144,25 @@
         </div>
     </div>
 
-    <div class="modal fade" id="ajaxModelPaid" aria-hidden="true">
+{{--    placeno znaci da se samo menja jedno polje u bazi--}}
+    <div class="modal fade" id="ajax_modal_paid" aria-hidden="true">
         <div class="modal-dialog" style="max-width: 60%">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="modelHeading"></h4>
+                    <h4 class="modal-title" id="modelHeading">DB Automatika</h4>
                 </div>
                 <div class="modal-body">
-                    <form id="orderForm" name="orderForm" class="form-horizontal">
+{{--bitan je id za form kada se kasnije prosledjuje Controlleru--}}
+                    <form id="form_paid" name="form_paid" class="form-horizontal">
                         @csrf
-                        {{--prenese se id--}}
                         <input type="hidden" name="order_id" id="order_id">
 
-                        <label class="col-sm-2 control-label">{{$order_id}}</label>
-
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">Da li ste sigurni da je platio?</label>
+                            <label class="col-sm-10 control-label">Da li ste sigurni da je plaćeno?</label>
                         </div>
 
                         <div class="col-sm-offset-2 col-sm-10">
-                            <button type="submit" class="btn btn-primary" id="paidBtn" value="create">Platio
+                            <button type="submit" class="btn btn-primary" id="paid_btn" value="create">Plaćeno je
                             </button>
                         </div>
                     </form>
@@ -168,36 +171,35 @@
         </div>
     </div>
 
-    <div class="modal fade" id="ajaxModalEdit" aria-hidden="true">
+    <div class="modal fade" id="ajax_modal_edit_item" aria-hidden="true">
         <div class="modal-dialog" style="max-width: 60%">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="modelHeading"></h4>
+                    <h4 class="modal-title" id="modelHeading">Promena stavke</h4>
                 </div>
                 <div class="modal-body">
-                    <form id="orderFormEdit" name="orderFormEdit" class="form-horizontal">
+                    <form id="form_edit_item" name="form_edit_item" class="form-horizontal">
                         @csrf
-                        {{--prenese se id--}}
                         <input type="hidden" name="order_item_id" id="order_item_id">
 
                         <div class="form-group">
-                            <label for="unit_price" class="col-sm-6 control-label">Kolicina</label>
+                            <label for="unit_price" class="col-sm-6 control-label">Količina</label>
                             <div class="col-sm-4">
                                 <input type="number" class="form-control" id="quantity_edit" name="quantity_edit"
-                                       placeholder="Kolicina" value="" maxlength="8" required="">
+                                       placeholder="Količina" value="" maxlength="8" required="">
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="unit_price" class="col-sm-6 control-label">Cena po komadu</label>
-                            <div class="col-sm-4">
+                            <label for="unit_price" class="col-sm-6 control-label">Cena po komadu u dinarima</label>
+                            <div class="col-sm-6">
                                 <input type="number" class="form-control" id="unit_price_edit" name="unit_price_edit"
                                        placeholder="Cena po komadu" value="" maxlength="8" required="">
                             </div>
                         </div>
 
                         <div class="col-sm-offset-2 col-sm-10">
-                            <button type="submit" class="btn btn-primary" id="editItemBtn" value="create">Platio
+                            <button type="submit" class="btn btn-primary" id="edit_item_btn" value="create">Sačuvaj
                             </button>
                         </div>
                     </form>
@@ -218,6 +220,7 @@
                 serverSide: true,
                 ajax: "{{ route('orders.show',$order_id) }}",
                 columns: [
+                    // ovde se definisu kolone za tabelu koje se dobije iz Controllera
                     {data: 'DT_RowIndex', name: 'DT_RowIndex'},
                     {data: 'item', name: 'item'},
                     {
@@ -230,42 +233,32 @@
                 ]
             });
 
-            $('#create_new_order').click(function () {
-                $('#saveBtn').show();
-                $('#total').prop("readonly", false);
-                $('#client_id').prop('disabled', false);
-                $('#saveBtn').val("create-order");
-                $('#order_id').val('');
-                $('#orderForm').trigger("reset");
-                $('#modelHeading').html("Dodaj novu stavku za izvestaj");
-                $('#ajaxModel').modal('show');
+            $('#create_new_item').click(function () {
+                $('#ajax_modal_new_item').modal('show');
             });
 
 
             $('#paid_button').click(function () {
-                $('#ajaxModelPaid').modal('show');
+                $('#ajax_modal_paid').modal('show');
             });
 
-            $('#paidBtn').click(function (e) {
+            $('#paid_btn').click(function (e) {
                 e.preventDefault();
                 $(this).html('Slanje...');
 
                 $.ajax({
-                    data: $('#orderForm').serialize(),
+                    // podaci iz forme koje gore prethodno predefinisana
+                    data: $('#form_paid').serialize(),
                     url: "{{ route('orders.update', $order_id) }}",
                     type: "PUT",
                     dataType: 'json',
                     success: function (data) {
-
-                        $('#orderForm').trigger("reset");
-                        $('#ajaxModelPaid').modal('hide');
-                        $('#saveBtn').html('Save Changes');
+                        $('#form_paid').trigger("reset");
                         location.reload();
-
                     },
                     error: function (data) {
                         console.log('Error:', data);
-                        $('#saveBtn').html('Save Changes');
+                        $('#save_btn').html('Desila se greška, pokušajte ponovo');
                     }
                 });
             });
@@ -273,77 +266,63 @@
             $('body').on('click', '#edit_order_item', function () {
                 var item_id = $(this).data('id');
                 $.get("{{ route('order_items.index') }}" + '/' + item_id + '/edit', function (data) {
-                    $('#modelHeading').html("Promena stavke");
-                    $('#saveBtn').show();
                     $('#quantity_edit').prop("readonly", false);
                     $('#quantity_edit').val(data.quantity);
                     $('#unit_price_edit').prop("readonly", false);
                     $('#unit_price_edit').val(data.unit_price);
-                    $('#ajaxModalEdit').modal('show');
+                    $('#ajax_modal_edit_item').modal('show');
                     $('#order_item_id').val(data.id);
                 })
             });
 
-            $('#editItemBtn').click(function (e) {
+            $('#edit_item_btn').click(function (e) {
                 e.preventDefault();
                 $(this).html('Slanje...');
                 var item_id = $('#order_item_id').val();
-                // alert(test);
                 $.ajax({
-                    data: $('#orderFormEdit').serialize(),
+                    data: $('#form_edit_item').serialize(),
                     url: "{{ route('order_items.index') }}"+ '/' + item_id ,
                     type: "PUT",
                     dataType: 'json',
                     success: function (data) {
-
-                        $('#orderForm').trigger("reset");
-                        $('#ajaxModel').modal('hide');
-                        // table.draw();
-                        // $('#saveBtn').html('Save Changes');
+                        $('#form_edit_item').trigger("reset");
                         location.reload();
-
                     },
                     error: function (data) {
                         console.log('Error:', data);
-                        $('#saveBtn').html('Save Changes');
+                        $('#save_btn').html('Greška, pokulajte ponovo');
                     }
                 });
             });
 
-            $('#saveBtn').click(function (e) {
+            $('#save_btn').click(function (e) {
                 e.preventDefault();
                 $(this).html('Slanje...');
 
                 $.ajax({
-                    data: $('#orderForm').serialize(),
+                    data: $('#form_new_item').serialize(),
                     url: "{{ route('order_items.store') }}",
                     type: "POST",
                     dataType: 'json',
                     success: function (data) {
-
-                        $('#orderForm').trigger("reset");
-                        $('#ajaxModel').modal('hide');
-                        // table.draw();
-                        // $('#saveBtn').html('Save Changes');
+                        $('#form_new_item').trigger("reset");
                         location.reload();
-
                     },
                     error: function (data) {
                         console.log('Error:', data);
-                        $('#saveBtn').html('Save Changes');
+                        $('#save_btn').html('Greška, pokušajte ponovo');
                     }
                 });
             });
 
             $('body').on('click', '#delete_order', function () {
-
-                var order_id = $(this).data("id");
-                confirm("Are You sure want to delete order!");
+                var id = $(this).data("id");
+                confirm("Da li ste sigurni da želite da obrišete?"+ id);
 
                 $.ajax({
                     type: "DELETE",
                     data: {"_token": "{{ csrf_token() }}"},
-                    url: "order_items/" + order_id,
+                    url: "../order_items/" + id,
                     success: function (data) {
                         location.reload();
                     },

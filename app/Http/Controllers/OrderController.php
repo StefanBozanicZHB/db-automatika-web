@@ -18,17 +18,18 @@ class OrderController extends Controller
         $this->middleware('auth');
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+/*
+index - sluzi za prikaz svih podataka
+show za prikaz pojedicnog zapisa iz tabele
+*/
     public function index(Request $request)
     {
         if ($request->ajax()) {
             $orders = Order::latest()->get();
             return Datatables::of($orders)
                 ->addIndexColumn()
+// podrazuvena se prosledjuju sve kolone iz tabele, preko toga mora da se dodaje rucna kao sto je u nastavku
+// nova kolona pod nazivom client koja ce se koristiti na view u dataTable
                 ->addColumn('client', function ($order) {
                     return $order->client->name;
                 })
@@ -59,7 +60,6 @@ class OrderController extends Controller
                 ->addColumn('action', function ($row) {
                     $btn = '<a href="orders/' . $row->id . '"  id="show_order" data-toggle="tooltip"  data-id="' . $row->id . '" data-original-title="Show" class="edit btn btn-info btn-sm">Pregled</a> ';
                     $btn = $btn . ' <a href="javascript:void(0)" id="delete_order" data-toggle="tooltip"  data-id="' . $row->id . '" data-original-title="Delete" class="btn btn-danger btn-sm ">Brisanje</a> ';
-
                     return $btn;
                 })
                 ->rawColumns(['action'])
@@ -69,26 +69,10 @@ class OrderController extends Controller
         return view("order.index")->with('clients', Client::all());
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create(Request $request)
     {
 
     }
-
-    public function paid($id)
-    {
-        dd($id);
-    }
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
 
     public function store(Request $request)
     {
@@ -102,22 +86,15 @@ class OrderController extends Controller
             'total' => 0,00
         ]);
 
-        return response()->json(['success' => 'City saved successfully.']);
+        return response()->json(['success' => 'Saved successfully.']);
     }
 
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
+//    show moze sa parametrima
     public function show(Request $request, $id)
     {
         $order = Order::find($id);
-
         $order_items = $order->orders_items;
-//        dd($order_items);
+
         if ($request->ajax()) {
             $order = Order::find($id);
             $order_items = $order->orders_items;
@@ -154,6 +131,7 @@ class OrderController extends Controller
             $paid = 'PLACENO';
         }
 
+// moze da se prenese ceo objekat, ali ovo je korisceno zbog testiranja
         return view("order.show")
             ->with('items', Item::all())
             ->with('order_id', $order->id)
@@ -164,45 +142,24 @@ class OrderController extends Controller
             ->with("date", $day .'.'.$mount.'.'.$year);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
         $order = Order::find($id);
         return response()->json($order);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
         Order::updateOrCreate(['id' => $id], [
             'paid' => true,
         ]);
 
-        return response()->json(['success' => 'Stavka uspesno sacuvana.']);
-//        return redirect()->route('orders.index', ['id' => $id]);
-
+        return response()->json(['success' => 'Saved successfully.']);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         Order::find($id)->delete();
-        return response()->json(['success' => 'Racun uspesno obrisan.']);
+        return response()->json(['success' => 'Destroy successfully.']);
     }
 }
