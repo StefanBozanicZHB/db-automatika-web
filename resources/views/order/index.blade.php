@@ -42,6 +42,7 @@
                             <th>Cena [RSD]</th>
                             <th>Plaćeno</th>
                             <th>Broj računa</th>
+                            <th>Tip</th>
                             <th>Akcija</th>
                         </tr>
                         </thead>
@@ -76,11 +77,29 @@
                             </div>
                         </div>
 
+
+                        <label class="col-sm-2 control-label">Tip fakture:</label>
+
+                        <div class="form-group col-sm-8">
+                            <div class="custom-control custom-radio">
+                                <input type="radio" class="custom-control-input" id="service"
+                                       name="type" checked value="0">
+                                <label class="custom-control-label" for="service">Usluga</label>
+                            </div>
+
+                            <div class="custom-control custom-radio">
+                                <input type="radio" class="custom-control-input" id="personally"
+                                       name="type" value="1">
+                                <label class="custom-control-label" for="personally">Lično</label>
+                            </div>
+                        </div>
+
+
                         <div class="form-group">
                             <label for="date" class="col-sm-2 control-label">Datum</label>
                             <div class="col-sm-8">
                                 <input type="date" class="form-control" id="date" name="date"
-                                       placeholder="Enter Total" value="" maxlength="50" required="">
+                                       value="<?php echo date('Y-m-d'); ?>" required="">
                             </div>
                         </div>
 
@@ -110,13 +129,15 @@
                     {data: 'client', name: 'client'},
                     {data: 'date_formated', name: 'date_formated'},
                     // {data: 'date', name: 'date'},
-                    {data: 'total',
+                    {
+                        data: 'total',
                         name: 'total',
                         className: 'dt-body-right',
                         render: $.fn.dataTable.render.number(',', '.', 2),
                     },
                     {data: 'paid', name: 'paid', className: 'dt-body-center'},
                     {data: 'account_num', name: 'account_num', className: 'dt-body-center'},
+                    {data: 'type', name: 'type', className: 'dt-body-center'},
                     {data: 'action', name: 'action', orderable: false, searchable: false},
                 ]
             });
@@ -160,19 +181,19 @@
             $('body').on('click', '#delete_order', function () {
 
                 var order_id = $(this).data("id");
-                confirm("Da li ste sigurni da želite da obrišete?");
-
-                $.ajax({
-                    type: "DELETE",
-                    data: {"_token": "{{ csrf_token() }}"},
-                    url: "orders/" + order_id,
-                    success: function (data) {
-                        table.draw();
-                    },
-                    error: function (data) {
-                        console.log('Error:', data);
-                    }
-                });
+                if(confirm("Da li ste sigurni da želite da obrišete?")) {
+                    $.ajax({
+                        type: "DELETE",
+                        data: {"_token": "{{ csrf_token() }}"},
+                        url: "orders/" + order_id,
+                        success: function (data) {
+                            table.draw();
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+                    });
+                }
             });
 
         });

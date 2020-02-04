@@ -45,7 +45,7 @@ class ItemController extends Controller
      */
     public function create()
     {
-        //
+        dd('test');
     }
 
     /**
@@ -108,5 +108,11 @@ class ItemController extends Controller
     {
         Item::find($id)->delete();
         return response()->json(['success' => 'Racun uspesno obrisan.']);
+    }
+
+    public function get_items()
+    {
+        $items = Item::orderBy('name', 'asc')->get()->pluck('name','id');
+        return response()->json($items);
     }
 }

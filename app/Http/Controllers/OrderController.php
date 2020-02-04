@@ -57,6 +57,12 @@ show za prikaz pojedicnog zapisa iz tabele
                     }
                     return 'NE';
                 })
+                ->addColumn('type', function ($order) {
+                    if ($order->type == 0) {
+                        return 'USLUGA';
+                    }
+                    return 'LIČNO';
+                })
                 ->addColumn('action', function ($row) {
                     $btn = '<a href="orders/' . $row->id . '"  id="show_order" data-toggle="tooltip"  data-id="' . $row->id . '" data-original-title="Show" class="edit btn btn-info btn-sm">Pregled</a> ';
                     $btn = $btn . ' <a href="javascript:void(0)" id="delete_order" data-toggle="tooltip"  data-id="' . $row->id . '" data-original-title="Delete" class="btn btn-danger btn-sm ">Brisanje</a> ';
@@ -83,7 +89,8 @@ show za prikaz pojedicnog zapisa iz tabele
             'date' => $request->date,
             'client_id' => $request->client_id,
             'account_number' => $maxValue,
-            'total' => 0,00
+            'total' => 0,00,
+            'type' => $request->type
         ]);
 
         return response()->json(['success' => 'Saved successfully.']);

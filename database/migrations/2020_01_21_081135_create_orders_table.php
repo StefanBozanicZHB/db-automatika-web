@@ -18,7 +18,7 @@ class CreateOrdersTable extends Migration
             $table->integer('client_id');
             $table->date('date');
             $table->integer('account_number');
-            $table->integer('type')->nullable();
+            $table->integer('type')->default(0); // 0 je usluga, 1 je licno
             $table->boolean('paid')->default(false);;
             $table->float('total',8,2)->nullable();
             $table->timestamps();

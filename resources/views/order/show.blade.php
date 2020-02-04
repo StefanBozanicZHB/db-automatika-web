@@ -72,7 +72,7 @@
 
                         <div style="margin: 5px 0px 60px 0px;">
                             <a class="btn btn-success" style="float: right;" href="javascript:void(0)"
-                               id="create_new_item">Nova stavka</a></div>
+                               id="create_new_order_item">Nova stavka</a></div>
                     </div>
 
                     <table class="table table-striped data-table">
@@ -95,27 +95,37 @@
     </div>
 {{--    modal za dodavanje nove stavke--}}
 {{--    najbitnije je name da formu csrf, id je bitan za promeni komponente--}}
-    <div class="modal fade" id="ajax_modal_new_item" aria-hidden="true">
+    <div class="modal fade" id="ajax_modal_new_order_item" aria-hidden="true">
         <div class="modal-dialog" style="max-width: 60%">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="modelHeading">Dodavanje nove stavke</h4>
                 </div>
                 <div class="modal-body">
-                    <form id="form_new_item" name="form_new_item" class="form-horizontal">
+                    <form id="form_new_order_item" name="form_new_order_item" class="form-horizontal">
                         @csrf
                         <input type="hidden" name="order_id" value="{{$order_id}}">
 
                         <div class="form-group">
                             <label class="col-sm-2 control-label">Stavka</label>
-                            <div class="col-sm-12">
-                                <select id="item_id" name="item_id" class="form-control" required>
-                                    <option value="">Izaberite stavku</option>
-                                    @foreach($items as $item)
-                                        <option value="{{$item['id']}}">{{$item['name']}}</option>
-                                    @endforeach
-                                </select>
+                            <div class="col-sm-12 row">
+                                <div class="col-md-11">
+                                    <select id="item_id" name="item_id" class="form-control " required>
+                                        <option value="">Izaberite stavku</option>
+                                        @foreach($items as $item)
+                                            <option value="{{$item['id']}}">{{$item['name']}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-1">
+                                    <a class="btn btn-primary" style="float: right;" id="create_new_item_btn">+
+                                    </a>
+                                </div>
+
+
+
                             </div>
+
                         </div>
 
                         <div class="form-group">
@@ -207,6 +217,34 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="ajax_modal_new_item" aria-hidden="true">
+        <div class="modal-dialog" style="max-width: 60%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modelHeading">Nova stavka</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="form_new_item" name="form_new_item" class="form-horizontal">
+                        @csrf
+
+                        <div class="form-group">
+                            <label for="unit_price" class="col-sm-6 control-label">Naziv</label>
+                            <div class="col-sm-12">
+                                <input type="text" class="form-control" id="name" name="name"
+                                       placeholder="Unesite naziv stavke" required>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-offset-2 col-sm-12">
+                            <a class="btn btn-primary" id="test_btn" style="float: right" value="create">Sačuvaj
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')
@@ -233,13 +271,59 @@
                 ]
             });
 
-            $('#create_new_item').click(function () {
-                $('#ajax_modal_new_item').modal('show');
+            $('#create_new_order_item').click(function () {
+                $('#ajax_modal_new_order_item').modal('show');
             });
 
 
             $('#paid_button').click(function () {
                 $('#ajax_modal_paid').modal('show');
+            });
+
+            $('#create_new_item_btn').click(function () {
+                $('#ajax_modal_new_order_item').modal('hide');
+                $('#ajax_modal_new_item').modal('show');
+            });
+
+            $('#test_btn').click(function () {
+                if ($('#name').val() != ''){
+                    $(this).html('Slanje...');
+                    $.ajax({
+                        data: $('#form_new_item').serialize(),
+                        url: "../items" ,
+                        type: "POST",
+                        dataType: 'json',
+                        success: function (data) {
+
+                            $.get("{{ url('api/get_items')}}",
+                                function(data) {
+                                    var item_id = $('#item_id');
+                                    item_id.empty();
+                                    // item_id.append("<option value=''>Odaberi stavku</option>");
+
+                                    $.each(data, function(key, value) {
+
+                                        item_id.append($("<option></option>")
+                                                .attr("value",key)
+                                                .text(value));
+                                    });
+
+                                }
+                            );
+
+                            $('#ajax_modal_new_item').modal('hide');
+                            $('#ajax_modal_new_order_item').modal('show');
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                            $('#saveBtn').html('Sacuvaj promene');
+                        }
+                    });
+
+                }
+                else {
+                    alert('Nije popunjeno polje za naziv stavke');
+                }
             });
 
             $('#paid_btn').click(function (e) {
@@ -300,12 +384,12 @@
                 $(this).html('Slanje...');
 
                 $.ajax({
-                    data: $('#form_new_item').serialize(),
+                    data: $('#form_new_order_item').serialize(),
                     url: "{{ route('order_items.store') }}",
                     type: "POST",
                     dataType: 'json',
                     success: function (data) {
-                        $('#form_new_item').trigger("reset");
+                        $('#form_new_order_item').trigger("reset");
                         location.reload();
                     },
                     error: function (data) {
@@ -317,19 +401,19 @@
 
             $('body').on('click', '#delete_order', function () {
                 var id = $(this).data("id");
-                confirm("Da li ste sigurni da želite da obrišete?"+ id);
-
-                $.ajax({
-                    type: "DELETE",
-                    data: {"_token": "{{ csrf_token() }}"},
-                    url: "../order_items/" + id,
-                    success: function (data) {
-                        location.reload();
-                    },
-                    error: function (data) {
-                        console.log('Error:', data);
-                    }
-                });
+                if(confirm("Da li ste sigurni da želite da obrišete?")) {
+                    $.ajax({
+                        type: "DELETE",
+                        data: {"_token": "{{ csrf_token() }}"},
+                        url: "../order_items/" + id,
+                        success: function (data) {
+                            location.reload();
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+                    });
+                }
             });
 
         });

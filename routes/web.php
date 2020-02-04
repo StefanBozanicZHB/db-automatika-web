@@ -19,7 +19,7 @@ Route::resource('clients', 'ClientController');
 Route::resource('orders', 'OrderController');
 Route::resource('items', 'ItemController');
 Route::resource('order_items', 'OrderItemController');
-Route::post('orders/paid', 'OrderController@paid')->name('orders.paid');
+Route::get('api/get_items', 'ItemController@get_items');
 
 Auth::routes();
 

@@ -149,19 +149,20 @@
             $('body').on('click', '#delete_item', function () {
 
                 var item_id = $(this).data("id");
-                confirm("Da li ste sigurni da zelite da obrisete stavku!");
+                if (confirm("Da li ste sigurni da želite da obrišete?")) {
 
-                $.ajax({
-                    type: "DELETE",
-                    data: {"_token": "{{ csrf_token() }}"},
-                    url: "items/" + item_id,
-                    success: function (data) {
-                        table.draw();
-                    },
-                    error: function (data) {
-                        console.log('Error:', data);
-                    }
-                });
+                    $.ajax({
+                        type: "DELETE",
+                        data: {"_token": "{{ csrf_token() }}"},
+                        url: "items/" + item_id,
+                        success: function (data) {
+                            table.draw();
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+                    });
+                }
             });
 
         });
