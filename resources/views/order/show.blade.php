@@ -13,7 +13,7 @@
                             <li class="breadcrumb-item"><a href="{{route('home')}}"
                                                            class="breadcrumb-link">Dashboard</a></li>
                             <li class="breadcrumb-item"><a href="{{route('orders.index')}}"
-                                                                                      class="breadcrumb-link">Pregled Evidencije</a></li>
+                                                           class="breadcrumb-link">Pregled Evidencije</a></li>
                             <li class="breadcrumb-item active" aria-current="page">Pregled Fakture</li>
                         </ol>
                     </nav>
@@ -34,12 +34,19 @@
                 <div class="card" style="padding: 5px">
                     <div style="margin: 5px;">
                         <div class="title m-b-md">
-                            <div>Klijent:
+                            <div>
+                                Klijent:
                                 <label style="color:black; font-weight: bold;">{{$client->name}}</label>
+
                                 @if($paid =='NEISPLACENO')
                                     <a class="btn btn-success" style="float: right;" href="javascript:void(0)"
-                                       id="paid_button">Platio</a></div>
-                            @endif
+                                       id="paid_button">Platio</a>
+                                @endif
+
+                                <a class="btn btn-danger" style="float: right; margin-right: 20px" href="javascript:void(0)"
+                                   id="paid_button">PDF</a>
+
+                            </div>
                         </div>
                         <div>
                             PIB: <label style="color:black; font-weight: bold;">{{$client->pib_number}}</label>
@@ -56,6 +63,16 @@
                         <div class="title m-b-md">
                             Broj racuna: <label style="color:black; font-weight: bold;">{{$account_num}}</label>
                         </div>
+
+                        <div class="title m-b-md">
+                            Vrsta:
+                            @if($type == 0)
+                                <label style="color:black; font-weight: bold;">USLUŽNO</label>
+                            @else
+                                <label style="color:black; font-weight: bold;">LIČNO</label>
+                            @endif
+                        </div>
+
                         @if($paid =='NEISPLACENO')
                             <div class="title m-b-md" style="color:red; font-weight: bold;">
                                 NEISPLAĆENO
@@ -66,13 +83,17 @@
                             </div>
                         @endif
 
-                        <div class="title m-b-md" style="color:green; font-weight: bold;">
+                        <div class="title m-b-md" style="color:green; font-weight: bold; margin-bottom: 20px">
                             Ukupno: {{number_format((float)$total, 2)}} RSD
                         </div>
 
-                        <div style="margin: 5px 0px 60px 0px;">
-                            <a class="btn btn-success" style="float: right;" href="javascript:void(0)"
-                               id="create_new_order_item">Nova stavka</a></div>
+                        @if($paid == 'NEISPLACENO')
+                            <div style="margin: 5px 0px 60px 0px;">
+                                <a class="btn btn-success" style="float: right;" href="javascript:void(0)"
+                                   id="create_new_order_item">Nova stavka</a></div>
+                        @endif
+
+
                     </div>
 
                     <table class="table table-striped data-table">
@@ -82,6 +103,7 @@
                             <th>Stavka</th>
                             <th>Cena [RSD]</th>
                             <th>Količina</th>
+                            <th>Ukupno</th>
                             <th>Akcija</th>
                         </tr>
                         </thead>
@@ -93,8 +115,8 @@
             </div>
         </div>
     </div>
-{{--    modal za dodavanje nove stavke--}}
-{{--    najbitnije je name da formu csrf, id je bitan za promeni komponente--}}
+    {{--    modal za dodavanje nove stavke--}}
+    {{--    najbitnije je name da formu csrf, id je bitan za promeni komponente--}}
     <div class="modal fade" id="ajax_modal_new_order_item" aria-hidden="true">
         <div class="modal-dialog" style="max-width: 60%">
             <div class="modal-content">
@@ -121,7 +143,6 @@
                                     <a class="btn btn-primary" style="float: right;" id="create_new_item_btn">+
                                     </a>
                                 </div>
-
 
 
                             </div>
@@ -154,7 +175,7 @@
         </div>
     </div>
 
-{{--    placeno znaci da se samo menja jedno polje u bazi--}}
+    {{--    placeno znaci da se samo menja jedno polje u bazi--}}
     <div class="modal fade" id="ajax_modal_paid" aria-hidden="true">
         <div class="modal-dialog" style="max-width: 60%">
             <div class="modal-content">
@@ -162,7 +183,7 @@
                     <h4 class="modal-title" id="modelHeading">DB Automatika</h4>
                 </div>
                 <div class="modal-body">
-{{--bitan je id za form kada se kasnije prosledjuje Controlleru--}}
+                    {{--bitan je id za form kada se kasnije prosledjuje Controlleru--}}
                     <form id="form_paid" name="form_paid" class="form-horizontal">
                         @csrf
                         <input type="hidden" name="order_id" id="order_id">
@@ -262,11 +283,18 @@
                     {data: 'DT_RowIndex', name: 'DT_RowIndex'},
                     {data: 'item', name: 'item'},
                     {
-                        data: 'price', name: 'price',
+                        data: 'price',
+                        name: 'price',
                         className: 'dt-body-right',
                         render: $.fn.dataTable.render.number(',', '.', 2),
                     },
                     {data: 'quantity', name: 'quantity', className: 'dt-body-right'},
+                    {
+                        data: 'total_item',
+                        name: 'total_item',
+                        className: 'dt-body-right',
+                        render: $.fn.dataTable.render.number(',', '.', 2),
+                    },
                     {data: 'action', name: 'action', orderable: false, searchable: false},
                 ]
             });
@@ -286,26 +314,26 @@
             });
 
             $('#test_btn').click(function () {
-                if ($('#name').val() != ''){
+                if ($('#name').val() != '') {
                     $(this).html('Slanje...');
                     $.ajax({
                         data: $('#form_new_item').serialize(),
-                        url: "../items" ,
+                        url: "../items",
                         type: "POST",
                         dataType: 'json',
                         success: function (data) {
 
                             $.get("{{ url('api/get_items')}}",
-                                function(data) {
+                                function (data) {
                                     var item_id = $('#item_id');
                                     item_id.empty();
                                     // item_id.append("<option value=''>Odaberi stavku</option>");
 
-                                    $.each(data, function(key, value) {
+                                    $.each(data, function (key, value) {
 
                                         item_id.append($("<option></option>")
-                                                .attr("value",key)
-                                                .text(value));
+                                            .attr("value", key)
+                                            .text(value));
                                     });
 
                                 }
@@ -365,7 +393,7 @@
                 var item_id = $('#order_item_id').val();
                 $.ajax({
                     data: $('#form_edit_item').serialize(),
-                    url: "{{ route('order_items.index') }}"+ '/' + item_id ,
+                    url: "{{ route('order_items.index') }}" + '/' + item_id,
                     type: "PUT",
                     dataType: 'json',
                     success: function (data) {
@@ -401,7 +429,7 @@
 
             $('body').on('click', '#delete_order', function () {
                 var id = $(this).data("id");
-                if(confirm("Da li ste sigurni da želite da obrišete?")) {
+                if (confirm("Da li ste sigurni da želite da obrišete?")) {
                     $.ajax({
                         type: "DELETE",
                         data: {"_token": "{{ csrf_token() }}"},
@@ -415,6 +443,13 @@
                     });
                 }
             });
+
+            // vidljiv samo ako je placeno
+
+            var data = '<?php echo json_encode($paid); ?>';
+            if (data == '"PLACENO"') {
+                table.columns([5, 5]).visible(false);
+            }
 
         });
 

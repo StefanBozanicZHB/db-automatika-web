@@ -23,4 +23,4 @@ Route::get('api/get_items', 'ItemController@get_items');
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/home', 'OrderController@index')->name('home');

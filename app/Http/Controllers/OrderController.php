@@ -4,11 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Client;
 use App\Item;
+use App\Mail\OrderConfirm;
 use App\Order;
+use App\Order_item;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use DataTables;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade as PDF;
 
 class OrderController extends Controller
 {
@@ -18,10 +22,10 @@ class OrderController extends Controller
         $this->middleware('auth');
     }
 
-/*
-index - sluzi za prikaz svih podataka
-show za prikaz pojedicnog zapisa iz tabele
-*/
+    /*
+    index - sluzi za prikaz svih podataka
+    show za prikaz pojedicnog zapisa iz tabele
+    */
     public function index(Request $request)
     {
         if ($request->ajax()) {
@@ -89,7 +93,7 @@ show za prikaz pojedicnog zapisa iz tabele
             'date' => $request->date,
             'client_id' => $request->client_id,
             'account_number' => $maxValue,
-            'total' => 0,00,
+            'total' => 0, 00,
             'type' => $request->type
         ]);
 
@@ -113,6 +117,9 @@ show za prikaz pojedicnog zapisa iz tabele
                 ->addColumn('price', function ($order_items) {
                     return $order_items->unit_price;
                 })
+                ->addColumn('total_item', function ($order_items) {
+                    return $order_items->quantity * $order_items->unit_price;
+                })
                 ->addColumn('action', function ($row) {
                     $btn = '<a href="javascript:void(0)" id="edit_order_item" data-toggle="tooltip"  data-id="' . $row->id . '" data-original-title="Show" class="edit btn btn-info btn-sm">Izmeni</a> ';
                     $btn = $btn . ' <a href="javascript:void(0)" id="delete_order" data-toggle="tooltip"  data-id="' . $row->id . '" data-original-title="Delete" class="btn btn-danger btn-sm ">Brisanje</a> ';
@@ -134,7 +141,7 @@ show za prikaz pojedicnog zapisa iz tabele
         $acc = $acc . $year;
 
         $paid = 'NEISPLACENO';
-        if($order->paid){
+        if ($order->paid) {
             $paid = 'PLACENO';
         }
 
@@ -143,10 +150,11 @@ show za prikaz pojedicnog zapisa iz tabele
             ->with('items', Item::all())
             ->with('order_id', $order->id)
             ->with("client", $order->client)
+            ->with("type", $order->type)
             ->with('total', $order->total)
             ->with("account_num", $acc)
             ->with("paid", $paid)
-            ->with("date", $day .'.'.$mount.'.'.$year);
+            ->with("date", $day . '.' . $mount . '.' . $year);
     }
 
     public function edit($id)
@@ -158,8 +166,12 @@ show za prikaz pojedicnog zapisa iz tabele
     public function update(Request $request, $id)
     {
         Order::updateOrCreate(['id' => $id], [
-            'paid' => true,
+            'paid' => false,
         ]);
+
+        $order = Order::find($id);
+        $this->export_pdf($order->id);
+        Mail::to('zhb.beograd@gmail.com')->send(new OrderConfirm($order));
 
         return response()->json(['success' => 'Saved successfully.']);
     }
@@ -168,5 +180,14 @@ show za prikaz pojedicnog zapisa iz tabele
     {
         Order::find($id)->delete();
         return response()->json(['success' => 'Destroy successfully.']);
+    }
+
+    public function export_pdf($id)
+    {
+        $order = Order::find($id);
+        $order_items = Order_item::where('order_id', $id)->get();
+        $pdf = PDF::loadView('invoice', compact('order','order_items'))->setPaper('a4', 'vertical');
+        $pdf->save( 'invoices/Narudzbina_broj_'.$order->id.'.pdf' );
+        return $pdf->download('Narudzbina_broj_'.$order->id.'.pdf');
     }
 }
