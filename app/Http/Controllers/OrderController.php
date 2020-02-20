@@ -166,7 +166,7 @@ class OrderController extends Controller
     public function update(Request $request, $id)
     {
         Order::updateOrCreate(['id' => $id], [
-            'paid' => false,
+            'paid' => true,
         ]);
 
         $order = Order::find($id);
@@ -185,9 +185,11 @@ class OrderController extends Controller
     public function export_pdf($id)
     {
         $order = Order::find($id);
+        $year = date('Y', strtotime($order->date));
+
         $order_items = Order_item::where('order_id', $id)->get();
         $pdf = PDF::loadView('invoice', compact('order','order_items'))->setPaper('a4', 'vertical');
-        $pdf->save( 'invoices/Narudzbina_broj_'.$order->id.'.pdf' );
-        return $pdf->download('Narudzbina_broj_'.$order->id.'.pdf');
+        $pdf->save( 'invoices/Faktura_'.$year.'_'.$order->account_number.'.pdf' );
+        return $pdf->download('Faktura_'.$year.'_'.$order->account_number.'.pdf' );
     }
 }

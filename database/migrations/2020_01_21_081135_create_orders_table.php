@@ -13,7 +13,7 @@ class CreateOrdersTable extends Migration
      */
     public function up()
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('dba_orders', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('client_id');
             $table->date('date');
@@ -32,6 +32,6 @@ class CreateOrdersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('dba_orders');
     }
 }

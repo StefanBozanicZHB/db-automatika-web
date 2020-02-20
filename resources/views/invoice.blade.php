@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Be Natural </title>
+    <title>DB Automatika</title>
     <link rel="stylesheet" href="style.css" media="all"/>
     <style>
         .clearfix:after {

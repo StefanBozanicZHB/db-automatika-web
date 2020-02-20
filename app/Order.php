@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
+    protected $table = 'dba_orders';
+
     protected $fillable = ['date', 'client_id', 'account_number', 'total', 'paid', 'type'];
     public function client()
     {

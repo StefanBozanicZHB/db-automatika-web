@@ -34,7 +34,7 @@
 <!-- ============================================================== -->
 <div class="splash-container">
     <div class="card">
-        <div class="card-header">{{ __('Smart Kiosk by MeanWell') }}</div>
+        <div class="card-header">{{ __('DB Automatika') }}</div>
 
         <div class="card-body">
             <form method="POST" action="{{ route('login') }}">

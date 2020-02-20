@@ -43,8 +43,8 @@
                                        id="paid_button">Platio</a>
                                 @endif
 
-                                <a class="btn btn-danger" style="float: right; margin-right: 20px" href="javascript:void(0)"
-                                   id="paid_button">PDF</a>
+                                <a class="btn btn-danger" style="float: right; margin-right: 20px" href="{{route('export_pdf', $order_id)}}"
+                                   id="pdf_button">PDF</a>
 
                             </div>
                         </div>
@@ -356,7 +356,7 @@
 
             $('#paid_btn').click(function (e) {
                 e.preventDefault();
-                $(this).html('Slanje...');
+                $(this).html('Slanje mejla u toku...');
 
                 $.ajax({
                     // podaci iz forme koje gore prethodno predefinisana

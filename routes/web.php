@@ -11,9 +11,11 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+//Route::get('/', function () {
+//    return route('login');
+//});
+
+Route::get('/', 'OrderController@index');
 
 Route::resource('clients', 'ClientController');
 Route::resource('orders', 'OrderController');
@@ -24,3 +26,4 @@ Route::get('api/get_items', 'ItemController@get_items');
 Auth::routes();
 
 Route::get('/home', 'OrderController@index')->name('home');
+Route::get('/export_pdf/{id}', 'OrderController@export_pdf')->name('export_pdf');

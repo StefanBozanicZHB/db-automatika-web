@@ -21,7 +21,10 @@ class OrderConfirm extends Mailable
     public function __construct(Order $order)
     {
         $this->order = $order;
-        $this->subject('BeNatural Kozmetika potvrda');
+
+        $year = date('Y', strtotime($order->date));
+
+        $this->subject('Faktura '.$year.'/'.$order->account_number);
     }
 
     /**
@@ -31,9 +34,13 @@ class OrderConfirm extends Mailable
      */
     public function build()
     {
+
+
+        $year = date('Y', strtotime($this->order->date));
+
         return $this->view('emails.order_confirm')
             ->with(['order' => $this->order])
-            ->attach('invoices/Narudzbina_broj_'.$this->order->id.'.pdf' );
+            ->attach('invoices/Faktura_'.$year.'_'.$this->order->account_number.'.pdf' );
     }
 }
 
